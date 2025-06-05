@@ -160,8 +160,8 @@ cython_debug/
 #.idea/
 
 #project folders
-#questions/
-#raw_tests/
-#reports/
-#results/
+questions/
+raw_tests/
+reports/
+results/
 
