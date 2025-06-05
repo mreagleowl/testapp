@@ -1,0 +1,178 @@
+#:import dp kivy.metrics.dp
+
+ScreenManager:
+    ThemeSelectionScreen:
+        name: "themes"
+    FioInputScreen:
+        name: "fio"
+    TestScreen:
+        name: "test"
+    ResultScreen:
+        name: "result"
+    AdminPinScreen:
+        name: "pin"
+    AdminScreen:
+        name: "admin"
+
+<ThemeSelectionScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(30)
+        spacing: dp(20)
+        Label:
+            text: "Оберіть тему тесту:"
+            font_size: '22sp'
+        RecycleView:
+            id: rv
+            viewclass: 'Button'
+            data: root.rv_data
+            RecycleBoxLayout:
+                default_size: None, dp(56)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: 0.1
+            spacing: dp(20)
+            Button:
+                text: "Адміністрування"
+                on_release: root.manager.current = "pin"
+            Button:
+                text: "Вийти"
+                on_release: app.stop()
+
+<FioInputScreen>:
+    selected_theme: ''
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(30)
+        spacing: dp(20)
+        Label:
+            text: "Введіть ПІБ"
+            font_size: '20sp'
+        TextInput:
+            id: fio_input
+            size_hint: None, None
+            size: dp(360), dp(44)
+            font_size: '18sp'
+            multiline: False
+            max_length: 50
+            pos_hint: {'center_x': 0.5}
+        Label:
+            id: error
+            text: ''
+            color: 1,0,0,1
+            font_size: '16sp'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(44)
+            spacing: dp(20)
+            Button:
+                text: "Назад"
+                on_release: root.go_back()
+            Button:
+                text: "Далі"
+                on_release: root.start_test()
+
+<TestScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(30)
+        spacing: dp(10)
+        Label:
+            id: question
+            text: ""
+            font_size: '22sp'
+            size_hint_y: None
+            height: dp(56)
+            color: 0,0,0,1
+        BoxLayout:
+            id: answers_box
+            orientation: 'vertical'
+            spacing: dp(10)
+            size_hint_y: 0.6
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(44)
+            spacing: dp(20)
+            Button:
+                text: "Назад"
+                on_release: root.prev()
+            Button:
+                text: "Далі"
+                on_release: root.next()
+        Button:
+            text: "Завершити"
+            size_hint_y: None
+            height: dp(44)
+            on_release: root.finish()
+        ProgressBar:
+            id: progress
+            max: 100
+            value: 0
+            size_hint_y: None
+            height: dp(14)
+
+<ResultScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(30)
+        spacing: dp(30)
+        Label:
+            id: score_label
+            text: ""
+            font_size: '24sp'
+        Button:
+            text: "До вибору тем"
+            size_hint_y: None
+            height: dp(44)
+            on_release: root.to_main()
+
+<AdminPinScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(30)
+        spacing: dp(20)
+        Label:
+            text: "Введіть PIN:"
+            font_size: '20sp'
+        TextInput:
+            id: pin_input
+            password: True
+            font_size: '22sp'
+            multiline: False
+            size_hint: None, None
+            size: dp(220), dp(44)
+            max_length: 16
+            halign: 'center'
+            pos_hint: {'center_x':0.5}
+        Label:
+            id: error_label
+            text: ""
+            color: 1,0,0,1
+            font_size: '15sp'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(44)
+            spacing: dp(20)
+            Button:
+                text: "Вхід"
+                on_release: root.check_pin()
+            Button:
+                text: "Назад"
+                on_release: root.go_back()
+
+<AdminScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(30)
+        spacing: dp(20)
+        Label:
+            text: "Адмін панель (звітність, інше)"
+        Button:
+            text: "Назад"
+            on_release: root.manager.current = "themes"

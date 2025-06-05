@@ -1,0 +1,23 @@
+{
+  "admin_pin": "1234",
+  "colors": {
+    "checkbox_active": [
+      0.7,
+      0,
+      0,
+      1
+    ],
+    "checkbox_inactive": [
+      0.8,
+      0.8,
+      0.8,
+      1
+    ],
+    "question": [
+      0,
+      0,
+      0,
+      1
+    ]
+  }
+}

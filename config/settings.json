@@ -1,0 +1,13 @@
+{
+  "admin_pin": "1234",
+  "theme": "light",
+  "colors": {
+    "primary_bg": "#F5F6FA",
+    "accent": "#E53935",
+    "checkbox_active": "#388E3C",
+    "checkbox_inactive": "#CCCCCC",
+    "text_question": "#222222",
+    "text_option": "#222222"
+  },
+  "lang": "uk"
+}
