@@ -33,14 +33,20 @@ ScreenManager:
                 height: self.minimum_height
                 orientation: 'vertical'
         BoxLayout:
-            size_hint_y: 0.1
-            spacing: dp(20)
-            Button:
+            orientation: 'horizontal'
+			size_hint_y: None
+			height: dp(44)
+			spacing: dp(20)
+			Button:
+			Button:
                 text: "Адміністрування"
-                on_release: root.manager.current = "pin"
+                size_hint_y: None
+				height: dp(44)
+				on_release: root.manager.current = "pin"
             Button:
-                text: "Вийти"
-                on_release: app.stop()
+                size_hint_y: None
+				height: dp(44)
+				on_release: app.stop()
 
 <FioInputScreen>:
     selected_theme: ''
@@ -175,4 +181,6 @@ ScreenManager:
             text: "Адмін панель (звітність, інше)"
         Button:
             text: "Назад"
-            on_release: root.manager.current = "themes"
+			size_hint_y: None
+			height: dp(44)
+			on_release: root.manager.current = "themes"

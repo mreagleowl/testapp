@@ -170,6 +170,7 @@ class AdminPinScreen(Screen):
         if pin == ADMIN_PIN:
             self.ids.error_label.text = ""
             self.manager.current = "admin"
+            self.ids.pin_input.text = ""
         else:
             self.ids.error_label.text = "Невірний PIN"
 
