@@ -1,4 +1,6 @@
+# v0.4.3
 #:import dp kivy.metrics.dp
+#:import HoverButton main.HoverButton
 
 ScreenManager:
     ThemeSelectionScreen:
@@ -24,7 +26,7 @@ ScreenManager:
             font_size: '22sp'
         RecycleView:
             id: rv
-            viewclass: 'Button'
+            viewclass: 'HoverButton'
             data: root.rv_data
             RecycleBoxLayout:
                 default_size: None, dp(56)
