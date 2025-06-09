@@ -1,10 +1,13 @@
-#main.py
+# main.py
 # v0.4.8
-import os, json, random
+
+import os
+import json
+import random
 from datetime import datetime
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import Screen
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ListProperty, StringProperty
 from kivy.uix.checkbox import CheckBox
@@ -16,11 +19,12 @@ from functools import partial
 # Грузим конфиг
 with open('config/config.json', encoding='utf-8') as cf:
     config = json.load(cf)
-COLORS = conf['colors']
+COLORS = config['colors']
 RESULTS_DIR = config.get('results_dir', 'results')
 QUESTIONS_DIR = config.get('questions_dir', 'questions')
 ADMIN_PIN = config.get('admin_pin', '1234')
-HOVER_COLOR = config.get('hover_color', [0.85, 0.33, 0.18, 1])
+HOVER_COLOR = COLORS.get('hover', [0.85, 0.33, 0.18, 1])
+HOVER_TEXT_COLOR = COLORS.get('hover_text', [0, 0.6, 0, 1])
 
 def get_theme_files():
     return [
@@ -46,7 +50,7 @@ class ThemeSelectionScreen(Screen):
         files = get_theme_files()
         self.rv_data = [{
             'text': os.path.splitext(f)[0],
-            'on_release': lambda fname=f: self.select_theme(fname),
+            'on_release': partial(self.select_theme, f),
             'cls': 'HoverButton'
         } for f in files]
 
@@ -75,25 +79,38 @@ class FioInputScreen(Screen):
 
 class HoverCheckBox(BoxLayout, HoverBehavior):
     def __init__(self, text, is_checked, on_press, **kwargs):
-        super().__init__(orientation='horizontal', size_hint_y=None, height=44, **kwargs)
+        super().__init__(orientation='horizontal', size_hint_y=None, height=44, padding=(10, 0), **kwargs)
         self.hover_color = HOVER_COLOR
-        self.cb = CheckBox(active=is_checked)
+        self.hover_text_color = HOVER_TEXT_COLOR
+
+        self.cb = CheckBox(active=is_checked, size_hint=(None, None), size=(32, 32))
         self.cb.color = COLORS['checkbox_active'] if is_checked else COLORS['checkbox_inactive']
-        self.lbl = Label(text=text, halign='left', valign='middle', color=COLORS['text'])
-        self.lbl.text_size = (None, None)
+        self.lbl = Label(
+            text=text,
+            halign='left',
+            valign='middle',
+            color=COLORS['text'],
+            size_hint_x=1
+        )
+        self.lbl.bind(size=self._update_text_size)
         self.add_widget(self.cb)
         self.add_widget(self.lbl)
-        self.cb.bind(active=lambda inst, val: (self.cb.setter('color')(self.cb, COLORS['checkbox_active' if val else 'checkbox_inactive']), on_press()))
-        self.bind(hovered=lambda inst, val: (self.on_enter() if val else self.on_leave()))
+
+        self.cb.bind(active=lambda inst, val: on_press())
+        self.bind(hovered=self.update_hover)
         self.lbl.bind(on_touch_down=self.on_touch_label)
+
+    def _update_text_size(self, instance, value):
+        self.lbl.text_size = (self.lbl.width, None)
 
     def on_enter(self):
         self.cb.background_color = self.hover_color
-        self.lbl.color = self.hover_color[:3] + [1]
+        self.lbl.color = self.hover_text_color
 
     def on_leave(self):
+        checked = self.cb.active
         self.cb.background_color = [1, 1, 1, 1]
-        self.lbl.color = [0, 0, 0, 1]
+        self.lbl.color = COLORS['checkbox_active'] if checked else COLORS['text']
 
     def update_hover(self, *args):
         if self.hovered:
@@ -113,7 +130,6 @@ class TestScreen(Screen):
             data = json.load(f)
         questions = data['questions']
         count = data.get('count', len(questions))
-        import random
         self.questions = random.sample(questions, min(count, len(questions)))
         self.answers = [[] for _ in self.questions]
         self.index = 0
