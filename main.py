@@ -1,21 +1,21 @@
-# v0.4.3
-import os
-import json
+# v0.4.8
+import os, json, random
 from datetime import datetime
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ListProperty, StringProperty
-from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from hover import HoverBehavior
+from functools import partial
 
 # Грузим конфиг
 with open('config/config.json', encoding='utf-8') as cf:
     config = json.load(cf)
+COLORS = conf['colors']
 RESULTS_DIR = config.get('results_dir', 'results')
 QUESTIONS_DIR = config.get('questions_dir', 'questions')
 ADMIN_PIN = config.get('admin_pin', '1234')
@@ -45,7 +45,7 @@ class ThemeSelectionScreen(Screen):
         files = get_theme_files()
         self.rv_data = [{
             'text': os.path.splitext(f)[0],
-            'on_release': lambda btn, fname=f: self.select_theme(fname),
+            'on_release': lambda fname=f: self.select_theme(fname),
             'cls': 'HoverButton'
         } for f in files]
 
@@ -77,11 +77,13 @@ class HoverCheckBox(BoxLayout, HoverBehavior):
         super().__init__(orientation='horizontal', size_hint_y=None, height=44, **kwargs)
         self.hover_color = HOVER_COLOR
         self.cb = CheckBox(active=is_checked)
-        self.lbl = Label(text=text, halign='left', valign='middle')
+        self.cb.color = COLORS['checkbox_active'] if is_checked else COLORS['checkbox_inactive']
+        self.lbl = Label(text=text, halign='left', valign='middle', color=COLORS['text'])
+        self.lbl.text_size = (None, None)
         self.add_widget(self.cb)
         self.add_widget(self.lbl)
-        self.cb.bind(active=lambda inst, val: on_press())
-        self.bind(hovered=self.update_hover)
+        self.cb.bind(active=lambda inst, val: (self.cb.setter('color')(self.cb, COLORS['checkbox_active' if val else 'checkbox_inactive']), on_press()))
+        self.bind(hovered=lambda inst, val: (self.on_enter() if val else self.on_leave()))
         self.lbl.bind(on_touch_down=self.on_touch_label)
 
     def on_enter(self):

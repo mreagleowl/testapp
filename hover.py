@@ -1,10 +1,10 @@
-# v0.4.3
+# v0.4.8
 from kivy.properties import BooleanProperty, ListProperty
 from kivy.core.window import Window
 
 class HoverBehavior(object):
     hovered = BooleanProperty(False)
-    hover_color = ListProperty([0.8, 0.2, 0.2, 1])
+    hover_color = ListProperty([1, 0, 0, 1])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
