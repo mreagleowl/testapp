@@ -1,26 +1,31 @@
+# app.kv
 # v0.4.8
-#:import dp kivy.metrics.dp
-#:import HoverButton main.HoverButton
-
+#:import App kivy.app.App
 ScreenManager:
     ThemeSelectionScreen:
-        name: "themes"
+        name: 'themes'
     FioInputScreen:
-        name: "fio"
+        name: 'fio'
     TestScreen:
-        name: "test"
+        name: 'test'
     ResultScreen:
-        name: "result"
+        name: 'result'
     AdminPinScreen:
-        name: "pin"
+        name: 'pin'
     AdminScreen:
-        name: "admin"
+        name: 'admin'
 
 <ThemeSelectionScreen>:
+    canvas.before:
+        Color:
+            rgba: app.BG_COLOR
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(20)
+        padding: 30
+        spacing: 20
         Label:
             text: "Оберіть тему тесту:"
             font_size: '22sp'
@@ -29,40 +34,48 @@ ScreenManager:
             viewclass: 'HoverButton'
             data: root.rv_data
             RecycleBoxLayout:
-                default_size: None, dp(56)
+                default_size: None, 56
                 default_size_hint: 1, None
                 size_hint_y: None
                 height: self.minimum_height
                 orientation: 'vertical'
         BoxLayout:
-            orientation: 'horizontal'
-			size_hint_y: None
-			height: dp(44)
-			spacing: dp(30)
-			Button:
+            size_hint_y: 0.1
+            spacing: 20
+            Button:
                 text: "Адміністрування"
                 size_hint_y: None
-				height: dp(44)
-				on_release: root.manager.current = "pin"
+                height: 44
+                on_release: root.manager.current = "pin"
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
             Button:
-				text: "Вихід"
+                text: "Вийти"
                 size_hint_y: None
-				height: dp(44)
-				on_release: app.stop()
+                height: 44
+                on_release: app.stop()
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
 
 <FioInputScreen>:
+    canvas.before:
+        Color:
+            rgba: app.BG_COLOR
+        Rectangle:
+            pos: self.pos
+            size: self.size
     selected_theme: ''
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(30)
-        spacing: dp(20)
+        padding: 30
+        spacing: 20
         Label:
             text: "Введіть ПІБ"
             font_size: '20sp'
         TextInput:
             id: fio_input
             size_hint: None, None
-            size: dp(360), dp(44)
+            size: 360, 44
             font_size: '18sp'
             multiline: False
             max_length: 50
@@ -75,60 +88,82 @@ ScreenManager:
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
-            height: dp(44)
-            spacing: dp(20)
+            height: 44
+            spacing: 20
             Button:
                 text: "Назад"
                 on_release: root.go_back()
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
             Button:
                 text: "Далі"
                 on_release: root.start_test()
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
 
 <TestScreen>:
+    canvas.before:
+        Color:
+            rgba: app.BG_COLOR
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(30)
-        spacing: dp(10)
+        padding: 30
+        spacing: 10
         Label:
             id: question
             text: ""
             font_size: '22sp'
             size_hint_y: None
-            height: dp(56)
-            color: 0,0,0,1
+            height: 56
+            color: 0,0,1,1
         BoxLayout:
             id: answers_box
             orientation: 'vertical'
-            spacing: dp(10)
+            spacing: 10
             size_hint_y: 0.6
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
-            height: dp(44)
-            spacing: dp(20)
+            height: 44
+            spacing: 20
             Button:
                 text: "Назад"
                 on_release: root.prev()
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
             Button:
                 text: "Далі"
                 on_release: root.next()
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
         Button:
             text: "Завершити"
             size_hint_y: None
-            height: dp(44)
+            height: 44
             on_release: root.finish()
+            background_color: app.BUTTON_BG
+            color: app.BUTTON_TEXT
         ProgressBar:
             id: progress
             max: 100
             value: 0
             size_hint_y: None
-            height: dp(14)
+            height: 14
 
 <ResultScreen>:
+    canvas.before:
+        Color:
+            rgba: app.BG_COLOR
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(30)
-        spacing: dp(30)
+        padding: 30
+        spacing: 30
         Label:
             id: score_label
             text: ""
@@ -136,14 +171,22 @@ ScreenManager:
         Button:
             text: "До вибору тем"
             size_hint_y: None
-            height: dp(44)
+            height: 44
             on_release: root.to_main()
+            background_color: app.BUTTON_BG
+            color: app.BUTTON_TEXT
 
 <AdminPinScreen>:
+    canvas.before:
+        Color:
+            rgba: app.BG_COLOR
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(30)
-        spacing: dp(20)
+        padding: 30
+        spacing: 20
         Label:
             text: "Введіть PIN:"
             font_size: '20sp'
@@ -153,7 +196,7 @@ ScreenManager:
             font_size: '22sp'
             multiline: False
             size_hint: None, None
-            size: dp(220), dp(44)
+            size: 220, 44
             max_length: 16
             halign: 'center'
             pos_hint: {'center_x':0.5}
@@ -165,24 +208,34 @@ ScreenManager:
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
-            height: dp(44)
-            spacing: dp(20)
+            height: 44
+            spacing: 20
             Button:
                 text: "Вхід"
                 on_release: root.check_pin()
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
             Button:
                 text: "Назад"
                 on_release: root.go_back()
+                background_color: app.BUTTON_BG
+                color: app.BUTTON_TEXT
 
 <AdminScreen>:
+    canvas.before:
+        Color:
+            rgba: app.BG_COLOR
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(30)
-        spacing: dp(20)
+        padding: 30
+        spacing: 20
         Label:
             text: "Адмін панель (звітність, інше)"
         Button:
             text: "Назад"
-			size_hint_y: None
-			height: dp(44)
-			on_release: root.manager.current = "themes"
+            on_release: root.manager.current = "themes"
+            background_color: app.BUTTON_BG
+            color: app.BUTTON_TEXT

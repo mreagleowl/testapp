@@ -1,14 +1,23 @@
 # v0.4.8
-from kivy.properties import BooleanProperty, ListProperty
+from kivy.properties import BooleanProperty
 from kivy.core.window import Window
 
 class HoverBehavior(object):
     hovered = BooleanProperty(False)
-    hover_color = ListProperty([1, 0, 0, 1])
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        Window.bind(mouse_pos=self.on_mouse_pos)
+        self._binded = False
+        self._hover_uid = None
+        self.register_event_type('on_enter')
+        self.register_event_type('on_leave')
+
+    def on_enter(self): pass
+    def on_leave(self): pass
+
+    def on_parent(self, *args):
+        if not self._binded:
+            Window.bind(mouse_pos=self.on_mouse_pos)
+            self._binded = True
 
     def on_mouse_pos(self, *args):
         if not self.get_root_window():
@@ -19,12 +28,6 @@ class HoverBehavior(object):
             return
         self.hovered = inside
         if inside:
-            self.on_enter()
+            self.dispatch('on_enter')
         else:
-            self.on_leave()
-
-    def on_enter(self):
-        pass
-
-    def on_leave(self):
-        pass
+            self.dispatch('on_leave')
