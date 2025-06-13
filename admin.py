@@ -10,12 +10,12 @@ REPORTS_DIR = "reports"
 
 class AdminScreen(Screen):
     pass
-    def on_enter(self):
-        self.ids.pin_input.text = ""
-        self.ids.pin_input.focus = True
-        self.ids.error_label.text = ""
-        self.ids.report_area.text = ""
-        self.pin_checked = False
+#    def on_enter(self):
+#        self.ids.pin_input.text = ""
+#        self.ids.pin_input.focus = True
+#        self.ids.error_label.text = ""
+#        self.ids.report_area.text = ""
+#        self.pin_checked = False
 
     def check_pin(self):
         from main import config

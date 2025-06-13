@@ -7,8 +7,8 @@ from datetime import datetime
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.properties import ListProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ListProperty, StringProperty
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
@@ -16,17 +16,16 @@ from kivy.uix.button import Button
 from hover import HoverBehavior
 from functools import partial
 
-# Грузим конфиг
+# --- Загружаем конфиг ---
 with open('config/config.json', encoding='utf-8') as cf:
     config = json.load(cf)
+COLORS = config.get('colors', {})
 RESULTS_DIR = config.get('results_dir', 'results')
 QUESTIONS_DIR = config.get('questions_dir', 'questions')
 ADMIN_PIN = config.get('admin_pin', '1234')
-HOVER_COLOR = config.get('hover_color', [0.85, 0.33, 0.18, 1])
-HOVER_TEXT_COLOR = config.get('hover_text', [0, 0.6, 0, 1])
-BG_COLOR = config.get('background', [0.94, 0.94, 0.94, 1])
-BUTTON_BG = config.get('button_bg', [0.2, 0.4, 0.7, 1])
-BUTTON_TEXT = config.get('button_text', [1, 1, 1, 1])
+
+def get_color(key, default):
+    return COLORS.get(key, default)
 
 def get_theme_files():
     return [
@@ -37,23 +36,24 @@ def get_theme_files():
 class HoverButton(Button, HoverBehavior):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.hover_color = HOVER_COLOR
-        self.original_bg = BUTTON_BG
-        self.background_color = BUTTON_BG
-        self.color = BUTTON_TEXT
+        self.background_color = get_color('button_bg', [1, 1, 1, 1])
+        self.color = get_color('button_text', [0, 0, 0, 1])
+        self.hover_color = get_color('hover', [0.85, 0.33, 0.18, 1])
+        self.hover_text_color = get_color('hover_text', [0, 0.6, 0, 1])
 
     def on_enter(self):
         self.background_color = self.hover_color
+        self.color = self.hover_text_color
 
     def on_leave(self):
-        self.background_color = self.original_bg
+        self.background_color = get_color('button_bg', [1, 1, 1, 1])
+        self.color = get_color('button_text', [0, 0, 0, 1])
 
 class ThemeSelectionScreen(Screen):
     rv_data = ListProperty([])
 
     def on_pre_enter(self):
         files = get_theme_files()
-        from functools import partial
         self.rv_data = [{
             'text': os.path.splitext(f)[0],
             'on_release': partial(self.select_theme, f),
@@ -86,23 +86,30 @@ class FioInputScreen(Screen):
 class HoverCheckBox(BoxLayout, HoverBehavior):
     def __init__(self, text, is_checked, on_press, **kwargs):
         super().__init__(orientation='horizontal', size_hint_y=None, height=44, **kwargs)
-        self.hover_color = HOVER_COLOR
-        self.hover_text_color = HOVER_TEXT_COLOR
-        self.cb = CheckBox(active=is_checked, color=HOVER_COLOR)
-        self.lbl = Label(text=text, halign='left', valign='middle', color=[0,0,1,1])
+        self.hover_color = get_color('hover', [0.85, 0.33, 0.18, 1])
+        self.hover_text_color = get_color('hover_text', [0, 0.6, 0, 1])
+        self.text_color = get_color('text', [0, 0, 1, 1])
+        self.cb_active = get_color('checkbox_active', [0.2, 0.6, 0.2, 1])
+        self.cb_inactive = get_color('checkbox_inactive', [0.7, 0.7, 0.7, 1])
+
+        self.cb = CheckBox(active=is_checked, color=self.cb_inactive, size_hint=(None, None), size=(24, 24))
+        self.lbl = Label(text=text, halign='left', valign='middle', color=self.text_color)
         self.add_widget(self.cb)
         self.add_widget(self.lbl)
         self.cb.bind(active=lambda inst, val: on_press())
+        self.cb.background_checkbox_normal = ""
+        self.cb.background_checkbox_down = ""
         self.bind(hovered=self.update_hover)
         self.lbl.bind(on_touch_down=self.on_touch_label)
+        self.update_colors()
 
     def on_enter(self):
-        self.cb.background_color = self.hover_color
         self.lbl.color = self.hover_text_color
+        self.cb.color = self.cb_active if self.cb.active else self.cb_inactive
 
     def on_leave(self):
-        self.cb.background_color = [1, 1, 1, 1]
-        self.lbl.color = [0, 0, 1, 1]
+        self.lbl.color = self.text_color
+        self.cb.color = self.cb_active if self.cb.active else self.cb_inactive
 
     def update_hover(self, *args):
         if self.hovered:
@@ -110,9 +117,13 @@ class HoverCheckBox(BoxLayout, HoverBehavior):
         else:
             self.on_leave()
 
+    def update_colors(self):
+        self.cb.color = self.cb_active if self.cb.active else self.cb_inactive
+
     def on_touch_label(self, instance, touch):
         if self.lbl.collide_point(*touch.pos):
             self.cb.active = not self.cb.active
+            self.update_colors()
 
 class TestScreen(Screen):
     def start(self, theme_file, fio):
@@ -193,25 +204,15 @@ class AdminPinScreen(Screen):
         self.ids.error_label.text = ""
         self.manager.current = "themes"
 
-# Импорт admin панели (отдельный файл)
 from admin import AdminScreen
 
 class KivyTestApp(App):
-    BG_COLOR = ListProperty(BG_COLOR)
-    BUTTON_BG = ListProperty(BUTTON_BG)
-    BUTTON_TEXT = ListProperty(BUTTON_TEXT)
-    
+    BG_COLOR = get_color('background', [0.8, 0.8, 0.8, 1])
+    BUTTON_BG = get_color('button_bg', [1, 1, 1, 1])
+    BUTTON_TEXT = get_color('button_text', [0, 0, 0, 1])
+
     def build(self):
-        self.title = "Тестування знань"
-        Builder.load_file("app.kv")
-        sm = ScreenManager()
-        sm.add_widget(ThemeSelectionScreen(name='themes'))
-        sm.add_widget(FioInputScreen(name='fio'))
-        sm.add_widget(TestScreen(name='test'))
-        sm.add_widget(ResultScreen(name='result'))
-        sm.add_widget(AdminPinScreen(name='pin'))
-        sm.add_widget(AdminScreen(name='admin'))
-        return sm
+        return Builder.load_file("app.kv")
 
 if __name__ == "__main__":
     KivyTestApp().run()

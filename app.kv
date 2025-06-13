@@ -1,6 +1,5 @@
 # app.kv
-# v0.4.8
-#:import App kivy.app.App
+# v0.4.9
 ScreenManager:
     ThemeSelectionScreen:
         name: 'themes'
@@ -29,6 +28,7 @@ ScreenManager:
         Label:
             text: "Оберіть тему тесту:"
             font_size: '22sp'
+            color: app.BUTTON_TEXT
         RecycleView:
             id: rv
             viewclass: 'HoverButton'
@@ -72,6 +72,7 @@ ScreenManager:
         Label:
             text: "Введіть ПІБ"
             font_size: '20sp'
+            color: app.BUTTON_TEXT
         TextInput:
             id: fio_input
             size_hint: None, None
@@ -118,7 +119,7 @@ ScreenManager:
             font_size: '22sp'
             size_hint_y: None
             height: 56
-            color: 0,0,1,1
+            color: app.BUTTON_TEXT
         BoxLayout:
             id: answers_box
             orientation: 'vertical'
@@ -168,6 +169,7 @@ ScreenManager:
             id: score_label
             text: ""
             font_size: '24sp'
+            color: app.BUTTON_TEXT
         Button:
             text: "До вибору тем"
             size_hint_y: None
@@ -190,6 +192,7 @@ ScreenManager:
         Label:
             text: "Введіть PIN:"
             font_size: '20sp'
+            color: app.BUTTON_TEXT
         TextInput:
             id: pin_input
             password: True
@@ -234,6 +237,7 @@ ScreenManager:
         spacing: 20
         Label:
             text: "Адмін панель (звітність, інше)"
+            color: app.BUTTON_TEXT
         Button:
             text: "Назад"
             on_release: root.manager.current = "themes"
