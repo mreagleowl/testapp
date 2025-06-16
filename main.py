@@ -1,5 +1,5 @@
 # main.py
-# v0.4.9
+# v0.4.10
 
 import os
 import json
@@ -16,16 +16,18 @@ from kivy.uix.button import Button
 from hover import HoverBehavior
 from functools import partial
 
-# --- Загружаем конфиг ---
+# Грузим конфиг
 with open('config/config.json', encoding='utf-8') as cf:
     config = json.load(cf)
-COLORS = config.get('colors', {})
+
 RESULTS_DIR = config.get('results_dir', 'results')
 QUESTIONS_DIR = config.get('questions_dir', 'questions')
 ADMIN_PIN = config.get('admin_pin', '1234')
-
-def get_color(key, default):
-    return COLORS.get(key, default)
+BG_COLOR = config.get('background', [0.94, 0.94, 0.94, 1])
+BUTTON_BG = config.get('button_bg', [0.25, 0.47, 0.77, 1])
+BUTTON_TEXT = config.get('button_text', [1, 1, 1, 1])
+HOVER_COLOR = config.get('hover_color', [0.85, 0.33, 0.18, 1])
+HOVER_TEXT = config.get('hover_text', [0, 0.6, 0, 1])
 
 def get_theme_files():
     return [
@@ -36,18 +38,13 @@ def get_theme_files():
 class HoverButton(Button, HoverBehavior):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.background_color = get_color('button_bg', [1, 1, 1, 1])
-        self.color = get_color('button_text', [0, 0, 0, 1])
-        self.hover_color = get_color('hover', [0.85, 0.33, 0.18, 1])
-        self.hover_text_color = get_color('hover_text', [0, 0.6, 0, 1])
+        self.hover_color = HOVER_COLOR
 
     def on_enter(self):
         self.background_color = self.hover_color
-        self.color = self.hover_text_color
 
     def on_leave(self):
-        self.background_color = get_color('button_bg', [1, 1, 1, 1])
-        self.color = get_color('button_text', [0, 0, 0, 1])
+        self.background_color = BUTTON_BG
 
 class ThemeSelectionScreen(Screen):
     rv_data = ListProperty([])
@@ -86,30 +83,33 @@ class FioInputScreen(Screen):
 class HoverCheckBox(BoxLayout, HoverBehavior):
     def __init__(self, text, is_checked, on_press, **kwargs):
         super().__init__(orientation='horizontal', size_hint_y=None, height=44, **kwargs)
-        self.hover_color = get_color('hover', [0.85, 0.33, 0.18, 1])
-        self.hover_text_color = get_color('hover_text', [0, 0.6, 0, 1])
-        self.text_color = get_color('text', [0, 0, 1, 1])
-        self.cb_active = get_color('checkbox_active', [0.2, 0.6, 0.2, 1])
-        self.cb_inactive = get_color('checkbox_inactive', [0.7, 0.7, 0.7, 1])
-
-        self.cb = CheckBox(active=is_checked, color=self.cb_inactive, size_hint=(None, None), size=(24, 24))
-        self.lbl = Label(text=text, halign='left', valign='middle', color=self.text_color)
+        self.hover_color = HOVER_COLOR
+        self.hover_text = HOVER_TEXT
+        self.default_text = [0, 0, 1, 1]  # синий
+        self.cb = CheckBox(active=is_checked, size_hint=(None, None), size=(32, 32))
+        self.lbl = Label(
+            text=text,
+            halign='left',
+            valign='middle',
+            size_hint_x=1,
+            color=self.default_text,
+        )
+        self.lbl.bind(size=lambda *x: setattr(self.lbl, 'text_size', (self.lbl.width, None)))
         self.add_widget(self.cb)
         self.add_widget(self.lbl)
         self.cb.bind(active=lambda inst, val: on_press())
-        self.cb.background_checkbox_normal = ""
-        self.cb.background_checkbox_down = ""
         self.bind(hovered=self.update_hover)
         self.lbl.bind(on_touch_down=self.on_touch_label)
-        self.update_colors()
+        self.cb.background_normal = ''
+        self.cb.background_color = [1, 1, 1, 1]
 
     def on_enter(self):
-        self.lbl.color = self.hover_text_color
-        self.cb.color = self.cb_active if self.cb.active else self.cb_inactive
+        self.cb.background_color = self.hover_color
+        self.lbl.color = self.hover_text
 
     def on_leave(self):
-        self.lbl.color = self.text_color
-        self.cb.color = self.cb_active if self.cb.active else self.cb_inactive
+        self.cb.background_color = [1, 1, 1, 1]
+        self.lbl.color = self.default_text
 
     def update_hover(self, *args):
         if self.hovered:
@@ -117,13 +117,9 @@ class HoverCheckBox(BoxLayout, HoverBehavior):
         else:
             self.on_leave()
 
-    def update_colors(self):
-        self.cb.color = self.cb_active if self.cb.active else self.cb_inactive
-
     def on_touch_label(self, instance, touch):
         if self.lbl.collide_point(*touch.pos):
             self.cb.active = not self.cb.active
-            self.update_colors()
 
 class TestScreen(Screen):
     def start(self, theme_file, fio):
@@ -153,7 +149,11 @@ class TestScreen(Screen):
                     self.answers[self.index].append(idx)
                 self.show_question()
             hover_cb = HoverCheckBox(option, checked, cb_action)
+            hover_cb.lbl.halign = 'left'
+            hover_cb.lbl.valign = 'middle'
+            hover_cb.lbl.text_size = (hover_cb.lbl.width, None)
             box.add_widget(hover_cb)
+        # прогрессбар
         pr = self.ids.progress
         pr.value = (self.index+1)/len(self.questions)*100
 
@@ -207,9 +207,9 @@ class AdminPinScreen(Screen):
 from admin import AdminScreen
 
 class KivyTestApp(App):
-    BG_COLOR = get_color('background', [0.8, 0.8, 0.8, 1])
-    BUTTON_BG = get_color('button_bg', [1, 1, 1, 1])
-    BUTTON_TEXT = get_color('button_text', [0, 0, 0, 1])
+    BG_COLOR = BG_COLOR
+    BUTTON_BG = BUTTON_BG
+    BUTTON_TEXT = BUTTON_TEXT
 
     def build(self):
         return Builder.load_file("app.kv")
